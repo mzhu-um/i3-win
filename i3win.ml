@@ -55,10 +55,10 @@ let rec prune_tree spc t : (string * (workspace option)) list =
           t
           |> member "nodes" |> to_list
           |> List.map (prune_workspace ("  " ^ spc) (ref 0)) |> List.flatten in
-        [Printf.sprintf "%s%s : %s" spc nm ty, Some {name = nm; windows = wins}]
+        [Printf.sprintf "%s<b>%s</b>" spc nm, Some {name = nm; windows = wins}]
      | "output"  ->
         if nm = "__i3" then []
-        else (Printf.sprintf "%s[output] %s" spc nm, None) :: next ("  " ^ spc)
+        else (Printf.sprintf "%s<span foreground=\"purple\">%s</span>" spc nm, None) :: next ("  " ^ spc)
      | _ -> next spc            (* Dig deeper! *)
      end
 and prune_workspace spc cntr t : (string * window) list =
@@ -74,7 +74,7 @@ and prune_workspace spc cntr t : (string * window) list =
      let id = t |> member "id" |> to_int in
      let idx = ! cntr in
      cntr := idx + 1; 
-     [Printf.sprintf "%s[%d] %s" spc idx name, {name; id; idx}]
+     [Printf.sprintf "%s<tt>|%d|</tt> %s" spc idx name, {name; id; idx}]
 
 let get_prompt_opt (wo : workspace option) =
   let open List in
@@ -107,7 +107,7 @@ let focus_by_idx (wksps : workspace list) wkidx winidx =
 
 let read_dialog info =
   let cmd =
-    Printf.sprintf "zenity --entry --text='%s'" info in
+    Printf.sprintf "yad --text-width=80 --geometry=600x600+0+0 --title='the-i3win' --entry --text='<big>%s</big>'" info in
   let ch = Unix.open_process_in cmd in
   let str = In_channel.input_all ch in
   In_channel.close ch;
