@@ -74,7 +74,7 @@ and prune_workspace spc cntr t : (string * window) list =
      let id = t |> member "id" |> to_int in
      let idx = ! cntr in
      cntr := idx + 1; 
-     [Printf.sprintf "%s[%d] %s -- %d" spc idx name id, {name; id; idx}]
+     [Printf.sprintf "%s[%d] %s" spc idx name, {name; id; idx}]
 
 let get_prompt_opt (wo : workspace option) =
   let open List in
@@ -116,7 +116,7 @@ let read_dialog info =
 
 let _ =
   let sws = get_tree_as_json () |> prune_tree "" in
+  let wksps = distill_workspace sws in
   let info = fuse_prompt sws in
   let i, j = read_dialog info in
-  let wksps = distill_workspace sws in
   focus_by_idx wksps i j

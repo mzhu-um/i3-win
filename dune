@@ -5,4 +5,5 @@
 (executable
  (libraries unix yojson str)
  (name i3win)
+ (modes native)
  (modules i3win))
