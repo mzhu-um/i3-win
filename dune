@@ -1,0 +1,8 @@
+(env
+ (_
+  (flags (:standard -w -32 -w -69))))
+
+(executable
+ (libraries unix yojson str)
+ (name i3win)
+ (modules i3win))
