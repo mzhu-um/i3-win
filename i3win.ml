@@ -17,7 +17,15 @@ let print_json t =
 
 let escape s =
   let open Str in
-  global_replace (regexp {|&|}) "amp" s
+  global_substitute (regexp {|[<>'&]|})
+    (fun s ->
+      match String.get (matched_string s) 0 with
+      | '<' -> "&lt;"
+      | '>' -> "&gt;"
+      | '\'' -> "&apos;"
+      | '&' -> "&amp;"
+      | _   -> failwith "NOWAY"
+    ) s
 
 let name_type t =
   let nm = t |> member "name" in
@@ -70,7 +78,7 @@ and prune_workspace spc cntr t : (string * window) list =
   match t |> member "name" with
   | `Null -> next spc
   | nm ->
-     let name = to_string nm in
+     let name = to_string nm |> escape in
      let id = t |> member "id" |> to_int in
      let idx = ! cntr in
      cntr := idx + 1; 
@@ -88,7 +96,7 @@ let get_prompt (l : (string * (workspace option)) list) =
   map (fun (s, wo) -> s :: get_prompt_opt wo) l |> flatten
 
 let fuse_prompt sws : string =
-  get_prompt sws |> String.concat "\n" |> escape
+  get_prompt sws |> String.concat "\n" (* |> escape *)
 
 let focus_by_id id =
   let cmd = Printf.sprintf "i3-msg '[con_id=%d]' focus" id in
@@ -108,6 +116,7 @@ let focus_by_idx (wksps : workspace list) wkidx winidx =
 let read_dialog info =
   let cmd =
     Printf.sprintf "yad --text-width=80 --geometry=600x600+0+0 --title='the-i3win' --entry --text='<big>%s</big>'" info in
+  let _ = print_endline cmd in
   let ch = Unix.open_process_in cmd in
   let str = In_channel.input_all ch in
   In_channel.close ch;
